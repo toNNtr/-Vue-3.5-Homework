@@ -52,7 +52,7 @@ export default [
     {
         title: "Наушники AirPods с беспроводным зарядным футляром",
         price: 16650,
-        image: "/img/airpods.jpgg"
+        image: "/img/airpods.jpg"
     },
     {
         title: "Наушники Sony",
