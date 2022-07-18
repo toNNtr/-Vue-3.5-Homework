@@ -1,97 +1,50 @@
 <template>
-<main class="content container">
-    <div class="content__top content__top--catalog">
-      <h1 class="content__title">
-        Каталог
-      </h1>
-      <span class="content__info">
-        152 товара
-      </span>
-    </div>
-
-    <div class="content__catalog">
-      
-      <ProductFilter
-        :min-price.sync="filter.minPrice"
-        :max-price.sync="filter.maxPrice"
-        :category-id.sync="filter.categoryID"
-        :color-id.sync="filter.colorID"
-      />
-
-      <section class="catalog">
-        <ProductList
-          :products="products"
-        />
-
-        <BasePagination
-          v-model="page"
-          :count="productsCount"
-          :per-page="productsPerPage"
-        />
-      </section>
-    </div>
-  </main>
+    <component
+        :is="currentPageComponent"
+        :page-params="currentPageParams"
+    />
 </template>
 
 <script>
-import products from "./data/products.js";
-import ProductList from "./components/ProductList.vue";
-import ProductFilter from "./components/ProductFilter.vue";
-import BasePagination from "./components/BasePagination.vue";
+    import MainPage from "@/pages/MainPage.vue";
+    import ProductPage from "@/pages/ProductPage.vue";
+    import NotFoundPage from "@/pages/NotFoundPage.vue";
 
-export default {
-  name: 'App',
-  components: {
-    ProductList,
-    ProductFilter,
-    BasePagination
-  },
-  data() {
-    return {
-      page: 1,
-      productsPerPage: 4,
-      filter: {
-        minPrice: 0,
-        maxPrice: 0,
-        categoryID: null,
-        colorID: null
-      }
+    import eventBus from "@/eventBus.js";
+
+    export default {
+        name: 'App',
+        components: {
+            MainPage,
+            ProductPage,
+            NotFoundPage
+        },
+        data() {
+            return {
+                currentPage: "main",
+                currentPageParams: {
+
+                },
+                routes: {
+                    main: "MainPage",
+                    product: "ProductPage",
+                    notFound: "NotFoundPage"
+                }
+            }
+        },
+        methods: {
+            goToPage(page, params) {
+                this.currentPage = page;
+                this.currentPageParams = (params || {});
+            }
+        },
+        computed: {
+            currentPageComponent() {
+                return this.routes[this.currentPage] || this.routes.notFound;
+            }
+        },
+        created() {
+            eventBus.$on("goToPage", (page, params) => this.goToPage(page, params));
+        }
     }
-  },
-  computed: {
-    filteredProducts() {
-      let filteredProducts = products;
-
-      /** Фильтрация по минимальной и максимальной стоимости */
-      if(this.filter.minPrice > 0) {
-        filteredProducts = filteredProducts.filter(product => product.price >= this.filter.minPrice);
-      }
-      
-      if(this.filter.maxPrice > 0) {
-        filteredProducts = filteredProducts.filter(product => product.price <= this.filter.maxPrice);
-      }
-
-
-      /** Фильтрация по категории */
-      if(this.filter.categoryID) {
-        filteredProducts = filteredProducts.filter(product => product.categoryID == this.filter.categoryID);
-      }
-
-
-      /** Фильтрация по цвету */
-      if(this.filter.colorID) {
-        filteredProducts = filteredProducts.filter(product => product.colors.includes(this.filter.colorID));
-      }
-
-      return filteredProducts;
-    },
-    products() {
-      let offset = (this.page - 1) * this.productsPerPage;
-      return this.filteredProducts.slice(offset, offset + this.productsPerPage);
-    },
-    productsCount() {
-      return this.filteredProducts.length;
-    }
-  }
-}
 </script>
