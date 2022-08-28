@@ -3,20 +3,16 @@
         <div class="content__top">
             <ul class="breadcrumbs">
                 <li class="breadcrumbs__item">
-                    <a class="breadcrumbs__link" href="#"
-                        @click.prevent="goToPage('main')"
-                    >
+                    <router-link class="breadcrumbs__link" :to="{name: 'main'}">
                         Каталог
-                    </a>
+                    </router-link>
                 </li>
                 <li class="breadcrumbs__item"
                     v-if="category"
                 >
-                    <a class="breadcrumbs__link" href="#"
-                        @click.prevent="goToPage('main')"
-                    >
+                    <router-link class="breadcrumbs__link" :to="{name: 'main'}">
                         {{ category.title }}
-                    </a>
+                    </router-link>
                 </li>
                 <li class="breadcrumbs__item">
                     {{ product.title }}
@@ -65,75 +61,7 @@
                 <h2 class="item__title">
                     {{ product.title }}
                 </h2>
-                <div class="item__form">
-                    <form class="form" action="#" method="POST">
-                        <b class="item__price">
-                            {{ product.price | numberFormat }}
-                        </b>
-
-                        <fieldset class="form__block">
-                            <legend class="form__legend">Цвет:</legend>
-                            <BaseColors
-                                v-model="currentColorID"
-                                :colors="product.colors"
-                            />
-                        </fieldset>
-
-                        <fieldset class="form__block">
-                            <legend class="form__legend">Объемб в ГБ:</legend>
-
-                            <ul class="sizes sizes--primery">
-                                <li class="sizes__item">
-                                    <label class="sizes__label">
-                                        <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="32">
-                                        <span class="sizes__value">
-                                            32gb
-                                        </span>
-                                    </label>
-                                </li>
-                                <li class="sizes__item">
-                                    <label class="sizes__label">
-                                        <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="64">
-                                        <span class="sizes__value">
-                                            64gb
-                                        </span>
-                                    </label>
-                                </li>
-                                <li class="sizes__item">
-                                    <label class="sizes__label">
-                                        <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="128"
-                                            checked="">
-                                        <span class="sizes__value">
-                                            128gb
-                                        </span>
-                                    </label>
-                                </li>
-                            </ul>
-                        </fieldset>
-
-                        <div class="item__row">
-                            <div class="form__counter">
-                                <button type="button" aria-label="Убрать один товар">
-                                    <svg width="12" height="12" fill="currentColor">
-                                        <use xlink:href="#icon-minus"></use>
-                                    </svg>
-                                </button>
-
-                                <input type="text" value="1" name="count">
-
-                                <button type="button" aria-label="Добавить один товар">
-                                    <svg width="12" height="12" fill="currentColor">
-                                        <use xlink:href="#icon-plus"></use>
-                                    </svg>
-                                </button>
-                            </div>
-
-                            <button class="button button--primery" type="submit">
-                                В корзину
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                <AddToCart :product-id="product.id"></AddToCart>
             </div>
 
             <div class="item__desc">
@@ -207,36 +135,30 @@ import products from "@/data/products.js";
 import categories from "@/data/categories.js";
 
 import goToPage from "@/helpers/goToPage.js";
-import numberFormat from "@/helpers/numberFormat.js";
 
 import BaseColors from "@/components/BaseColors.vue";
+import AddToCart from "@/components/AddToCart.vue";
 
 export default {
-    props: ["pageParams"],
     components: {
-        BaseColors
+        BaseColors,
+        AddToCart
     },
     data() {
         return {
             currentColorID: null
         };
     },
-    filters: {
-        numberFormat
-    },
     methods: {
         goToPage
     },
     computed: {
         product() {
-            return products.find(product => product.id == this.pageParams.id);
+            return products.find(product => product.id == Number(this.$route.params.id));
         },
         category() {
             return categories.find(category => category.id == this.product.categoryID);
         }
-    },
-    created() {
-        this.currentColorID = this.product.colors[0];
     }
 }
 </script>

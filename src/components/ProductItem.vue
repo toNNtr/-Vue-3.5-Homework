@@ -1,17 +1,15 @@
 <template>
     <div>
-        <a class="catalog__pic" href="#"
-            @click.prevent="goToPage('product', {id: product.id})"
+        <router-link class="catalog__pic" :to="{name: 'product', params: {id: product.id}}"
         >
             <img :src="product.image" :alt="product.title">
-        </a>
+        </router-link>
 
         <h3 class="catalog__title">
-            <a href="#"
-                @click.prevent="goToPage('product', {id: product.id})"
+            <router-link :to="{name: 'product', params: {id: product.id}}"
             >
                 {{ product.title }}
-            </a>
+            </router-link>
         </h3>
 
         <span class="catalog__price">
@@ -20,12 +18,13 @@
 
         <BaseColors class="colors--black"
             v-model="currentColorID"
-            :colors="product.colors"
+            :colors="colors"
         />
     </div>
 </template>
 
 <script>
+import colors from "@/data/colors.js";
 import goToPage from "@/helpers/goToPage.js";
 import numberFormat from "@/helpers/numberFormat.js";
 
@@ -42,6 +41,11 @@ export default {
         return {
             currentColorID: this.product.colors[0]
         };
+    },
+    computed: {
+        colors() {
+            return colors.filter(color => this.product.colors.find(productColorID => productColorID == color.id));
+        }
     },
     filters: {
         numberFormat

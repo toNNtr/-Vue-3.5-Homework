@@ -49,7 +49,7 @@ export default {
     },
     computed: {
         colorsList() {
-            return this.colors.map(color => colors.find(value => value.id == color));
+            return this.colors;
         }
     },
     watch: {

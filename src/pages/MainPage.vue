@@ -24,7 +24,7 @@
                 />
 
                 <BasePagination
-                    v-show="products.length > 0"
+                    v-if="products.length > 0"
                     v-model="page"
                     :count="productsCount"
                     :per-page="productsPerPage"

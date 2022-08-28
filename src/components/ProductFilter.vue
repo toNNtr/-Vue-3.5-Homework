@@ -110,8 +110,8 @@
 
 
 <script>
-import categories from "../data/categories.js";
-import colors from "../data/colors.js";
+import categories from "@/data/categories.js";
+import colors from "@/data/colors.js";
 
 import BaseColors from "@/components/BaseColors.vue";
 
@@ -133,7 +133,7 @@ export default {
             return categories;
         },
         colors() {
-            return colors.map(color => color.id);
+            return colors;
         }
     },
     watch: {
