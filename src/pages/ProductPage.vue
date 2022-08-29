@@ -61,7 +61,67 @@
                 <h2 class="item__title">
                     {{ product.title }}
                 </h2>
-                <AddToCart :product-id="product.id"></AddToCart>
+                <div class="item__form">
+                    <form class="form"
+                        @submit.prevent="addToCart"
+                    >
+                        <b class="item__price">
+                            {{ product.price | numberFormat }}
+                        </b>
+
+                        <fieldset class="form__block">
+                            <legend class="form__legend">Цвет:</legend>
+                            <BaseColors
+                                v-model="currentColorID"
+                                :colors="colors"
+                            />
+                        </fieldset>
+
+                        <fieldset class="form__block">
+                            <legend class="form__legend">Объем в ГБ:</legend>
+
+                            <ul class="sizes sizes--primery">
+                                <li class="sizes__item">
+                                    <label class="sizes__label">
+                                        <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="32">
+                                        <span class="sizes__value">
+                                            32gb
+                                        </span>
+                                    </label>
+                                </li>
+                                <li class="sizes__item">
+                                    <label class="sizes__label">
+                                        <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="64">
+                                        <span class="sizes__value">
+                                            64gb
+                                        </span>
+                                    </label>
+                                </li>
+                                <li class="sizes__item">
+                                    <label class="sizes__label">
+                                        <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="128"
+                                            checked="">
+                                        <span class="sizes__value">
+                                            128gb
+                                        </span>
+                                    </label>
+                                </li>
+                            </ul>
+                        </fieldset>
+
+                        <div class="item__row">
+                            <InputNumber
+                                :min="1"
+                                :max="100"
+                                v-model.number="amount"
+                            />
+
+                            <button class="button button--primery" type="submit">
+                                В корзину
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <div class="item__desc">
@@ -132,25 +192,32 @@
 
 <script>
 import products from "@/data/products.js";
+import colors from "@/data/colors.js";
 import categories from "@/data/categories.js";
 
-import goToPage from "@/helpers/goToPage.js";
+import numberFormat from "@/helpers/numberFormat.js";
 
+import InputNumber from "@/components/InputNumber.vue";
 import BaseColors from "@/components/BaseColors.vue";
-import AddToCart from "@/components/AddToCart.vue";
 
 export default {
     components: {
         BaseColors,
-        AddToCart
+        InputNumber
     },
     data() {
         return {
-            currentColorID: null
+            currentColorID: null,
+            amount: 1
         };
     },
     methods: {
-        goToPage
+        addToCart() {
+            this.$store.commit("addProductToCart", {
+                productID: this.product.id,
+                amount: this.amount
+            });
+        }
     },
     computed: {
         product() {
@@ -158,7 +225,16 @@ export default {
         },
         category() {
             return categories.find(category => category.id == this.product.categoryID);
+        },
+        colors() {
+            return colors.filter(color => this.product.colors.find(productColorID => productColorID == color.id));
         }
+    },
+    filters: {
+        numberFormat
+    },
+    created() {
+        this.currentColorID = this.product.colors[0];
     }
 }
 </script>

@@ -30,8 +30,6 @@
 </template>
 
 <script>
-import colors from "@/data/colors.js";
-
 export default {
     model: {
         prop: "selectedColor",

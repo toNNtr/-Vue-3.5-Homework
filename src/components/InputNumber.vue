@@ -8,7 +8,7 @@
         </svg>
     </button>
 
-    <input type="text" v-model.number="value" name="count">
+    <input type="text" v-model.number.lazy="value" name="count">
 
     <button type="button" aria-label="Увеличить количество"
         @click="value++"
@@ -46,38 +46,23 @@ export default {
         prop: "initialValue",
         event: "onValueChanged"
     },
-    data() {
-        return {
-            value: this.initialValue
-        }
-    },
-    watch: {
+    computed: {
         value: {
-            immediate: true,
-            handler(newValue, oldValue) {
-                if(isNaN(newValue) && newValue != "-") {
-                    this.value = oldValue;
-                } else if(!isNaN(newValue)) {
-                    if(this.min != undefined) {
-                        newValue = Math.max(this.min, newValue);
-                        oldValue = Math.max(this.min, oldValue);
-                    }
-                    if(this.max != undefined) {
-                        newValue = Math.min(this.max, newValue);
-                        oldValue = Math.min(this.max, oldValue);
-                    }
-    
-                    if(oldValue != this.value) {
-                        this.value = newValue;
-                        if(newValue != oldValue) {
-                            this.$emit("onValueChanged", newValue);
-                        }
-                    }
+            get() {
+                return this.initialValue;
+            },
+            set(newValue) {
+                if(this.min != undefined) {
+                    newValue = Math.max(this.min, newValue);
+                }
+                if(this.max != undefined) {
+                    newValue = Math.min(this.max, newValue);
+                }
+
+                if(newValue != this.initialValue) {
+                    this.$emit("onValueChanged", newValue);
                 }
             }
-        },
-        initialValue(newValue) {
-            this.value = newValue;
         }
     }
 }
