@@ -16,18 +16,17 @@
     <div class="" style="align-self: center;"
         v-else
     >
-        <h3>Ничего не найдено 😥</h3>
+        <h3>{{ placeholder }}</h3>
     </div>
 </template>
 
 <script>
-import ProductItem from "./ProductItem.vue";
+    import ProductItem from "./ProductItem.vue";
 
-export default {
-    props: ['products'],
-    components: {
-        ProductItem
-    }
-};
-
+    export default {
+        props: ['products', 'placeholder'],
+        components: {
+            ProductItem
+        }
+    };
 </script>

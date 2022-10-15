@@ -4,7 +4,7 @@
             <ul class="breadcrumbs">
                 <li class="breadcrumbs__item">
                     <router-link class="breadcrumbs__link"
-                        :to="{name: 'main'}"
+                        :to="{ name: 'main' }"
                     >
                         Каталог
                     </router-link>
@@ -27,7 +27,12 @@
         <section class="cart">
             <form class="cart__form form" action="#" method="POST">
                 <div class="cart__field">
-                    <ul class="cart__list">
+                    <div 
+                        v-if="isCartLoading"
+                    >Загрузка товаров...</div>
+                    <ul class="cart__list"
+                        v-else
+                    >
                         <CartItem
                             v-for="cartProduct in cartProducts"
                             :key="cartProduct.productID"
@@ -54,33 +59,30 @@
 </template>
 
 <script>
-import numberFormat from "@/helpers/numberFormat.js";
-import numWords from "@/helpers/numWords.js";
+    import numberFormat from "@/helpers/numberFormat.js";
+    import numWords from "@/helpers/numWords.js";
 
-import CartItem from "@/components/CartItem.vue";
+    import CartItem from "@/components/CartItem.vue";
 
-import {mapGetters} from "vuex";
+    import { mapGetters } from "vuex";
 
-export default {
-    components: {
-        CartItem
-    },
-    filters: {
-        numberFormat
-    },
-    methods: {
-        numWords
-    },
-    computed: {
-        ...mapGetters({
-            cartProducts: "cartDetailProducts",
-            totalPrice: "totalCartPrice",
-            cartProductsAmount: "cartProductsAmount"
-        })
+    export default {
+        components: {
+            CartItem
+        },
+        filters: {
+            numberFormat
+        },
+        methods: {
+            numWords
+        },
+        computed: {
+            ...mapGetters({
+                cartProducts: "cartDetailProducts",
+                totalPrice: "totalCartPrice",
+                cartProductsAmount: "cartProductsAmount",
+                isCartLoading: "isCartLoading"
+            })
+        }
     }
-}
 </script>
-
-<style>
-
-</style>

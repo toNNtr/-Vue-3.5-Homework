@@ -110,59 +110,55 @@
 
 
 <script>
-import categories from "@/data/categories.js";
-import colors from "@/data/colors.js";
+    import { mapGetters } from "vuex";
+    import BaseColors from "@/components/BaseColors.vue";
 
-import BaseColors from "@/components/BaseColors.vue";
-
-export default {
-    props: ["minPrice", "maxPrice", "categoryId", "colorId"],
-    components: {
-        BaseColors
-    },
-    data() {
-        return {
-            currentMinPrice: this.minPrice,
-            currentMaxPrice: this.maxPrice,
-            currentCategoryID: this.categoryId,
-            currentColorID: this.colorId,
-        };
-    },
-    computed: {
-        categories() {
-            return categories;
+    export default {
+        props: ["minPrice", "maxPrice", "categoryId", "colorId"],
+        components: {
+            BaseColors
         },
-        colors() {
-            return colors;
-        }
-    },
-    watch: {
-        minPrice(value) {
-            this.currentMinPrice = value;
+        data() {
+            return {
+                currentMinPrice: this.minPrice,
+                currentMaxPrice: this.maxPrice,
+                currentCategoryID: this.categoryId,
+                currentColorID: this.colorId,
+            };
         },
-        maxPrice(value) {
-            this.currentMaxPrice = value;
+        computed: {
+            ...mapGetters({
+                categories: "categories",
+                colors: "colors"
+            })
         },
-        categoryId(value) {
-            this.currentCategoryID = value;
+        watch: {
+            minPrice(value) {
+                this.currentMinPrice = value;
+            },
+            maxPrice(value) {
+                this.currentMaxPrice = value;
+            },
+            categoryId(value) {
+                this.currentCategoryID = value;
+            },
+            colorId(value) {
+                this.currentColorID = value;
+            }
         },
-        colorId(value) {
-            this.currentColorID = value;
-        }
-    },
-    methods: {
-        submit() {
-            this.$emit("update:minPrice", this.currentMinPrice);
-            this.$emit("update:maxPrice", this.currentMaxPrice);
-            this.$emit("update:categoryId", this.currentCategoryID);
-            this.$emit("update:colorId", this.currentColorID);
-        },
-        clear() {
-            this.$emit("update:minPrice", 0);
-            this.$emit("update:maxPrice", 0);
-            this.$emit("update:categoryId", null);
-            this.$emit("update:colorId", null);
+        methods: {
+            submit() {
+                this.$emit("update:minPrice", this.currentMinPrice);
+                this.$emit("update:maxPrice", this.currentMaxPrice);
+                this.$emit("update:categoryId", this.currentCategoryID);
+                this.$emit("update:colorId", this.currentColorID);
+            },
+            clear() {
+                this.$emit("update:minPrice", 0);
+                this.$emit("update:maxPrice", 0);
+                this.$emit("update:categoryId", null);
+                this.$emit("update:colorId", null);
+            }
         }
     }
-}
 </script>

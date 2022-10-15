@@ -18,40 +18,42 @@
 
         <BaseColors class="colors--black"
             v-model="currentColorID"
-            :colors="colors"
+            :colors="productColors"
         />
     </div>
 </template>
 
 <script>
-import colors from "@/data/colors.js";
-import goToPage from "@/helpers/goToPage.js";
-import numberFormat from "@/helpers/numberFormat.js";
+    import goToPage from "@/helpers/goToPage.js";
+    import numberFormat from "@/helpers/numberFormat.js";
 
-import BaseColors from "@/components/BaseColors.vue";
+    import BaseColors from "@/components/BaseColors.vue";
 
-export default {
-    props: [
-        "product"
-    ],
-    components: {
-        BaseColors
-    },
-    data() {
-        return {
-            currentColorID: this.product.colors[0]
-        };
-    },
-    computed: {
-        colors() {
-            return colors.filter(color => this.product.colors.find(productColorID => productColorID == color.id));
+    export default {
+        props: ["product"],
+        components: {
+            BaseColors
+        },
+        data() {
+            return {
+                currentColorID: null
+            };
+        },
+        computed: {
+            productColors() {
+                    return this.product.colors;
+            }
+        },
+        filters: {
+            numberFormat
+        },
+        methods: {
+            goToPage
+        },
+        mounted() {
+            if(this.productColors.length) {
+                this.currentColorID = this.productColors[0].id;
+            }
         }
-    },
-    filters: {
-        numberFormat
-    },
-    methods: {
-        goToPage
     }
-}
 </script>

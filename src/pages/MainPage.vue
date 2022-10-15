@@ -19,6 +19,21 @@
             />
 
             <section class="catalog">
+                <div class=""
+                    v-if="productsLoading"
+                >
+                    Загрузка товаров...
+                </div>
+                <div class=""
+                    v-if="productsLoadingFailed"
+                >
+                    При загрузке произошла ошибка.
+                    <button
+                        @click.prevent="loadProductsData"
+                    >
+                        Попробовать еще раз
+                    </button>
+                </div>
                 <ProductList
                     :products="products"
                 />
@@ -35,7 +50,8 @@
 </template>
 
 <script>
-    import products from "@/data/products.js";
+    import { mapActions } from "vuex";
+
     import ProductList from "@/components/ProductList.vue";
     import ProductFilter from "@/components/ProductFilter.vue";
     import BasePagination from "@/components/BasePagination.vue";
@@ -57,43 +73,76 @@
                     maxPrice: 0,
                     categoryID: null,
                     colorID: null
-                }
+                },
+                productsData: null,
+                productsLoading: false,
+                productsLoadingFailed: false,
             };
         },
         computed: {
-            filteredProducts() {
-                let filteredProducts = products;
-
-                /** Фильтрация по минимальной и максимальной стоимости */
-                if (this.filter.minPrice > 0) {
-                    filteredProducts = filteredProducts.filter(product => product.price >= this.filter.minPrice);
-                }
-
-                if (this.filter.maxPrice > 0) {
-                    filteredProducts = filteredProducts.filter(product => product.price <= this.filter.maxPrice);
-                }
-
-
-                /** Фильтрация по категории */
-                if (this.filter.categoryID) {
-                    filteredProducts = filteredProducts.filter(product => product.categoryID == this.filter.categoryID);
-                }
-
-
-                /** Фильтрация по цвету */
-                if (this.filter.colorID) {
-                    filteredProducts = filteredProducts.filter(product => product.colors.includes(this.filter.colorID));
-                }
-
-                return filteredProducts;
-            },
             products() {
-                let offset = (this.page - 1) * this.productsPerPage;
-                return this.filteredProducts.slice(offset, offset + this.productsPerPage);
+
+                return this.productsData ? this.productsData.items.map(product => {
+                        return {
+                            ...product,
+                            image: product.image.file.url,
+                            colors: product.colors.map(color => {
+                                return {
+                                    ...color,
+                                    value: color.code
+                                };
+                            })
+                        };
+                    }) : [];
             },
             productsCount() {
-                return this.filteredProducts.length;
+                if(!this.productsData) {
+                    return 0;
+                }
+
+                return this.productsData.pagination ? this.productsData.pagination.total : this.products.length;
             }
+        },
+        methods: {
+            ...mapActions({
+                loadProducts: "loadProducts"
+            }),
+            loadProductsData() {
+                this.productsLoading = true;
+                this.productsLoadingFailed = false;
+
+                this.loadProducts({
+                    page: this.page,
+                    limit: this.productsPerPage,
+                    categoryID: this.filter.categoryID,
+                    colorID: this.filter.colorID,
+                    minPrice: this.filter.minPrice,
+                    maxPrice: this.filter.maxPrice
+                })
+                .then(productsData => {
+                    this.productsData = productsData;
+                })
+                .catch(reason => {
+                    this.productsLoadingFailed = true;
+                })
+                .finally(() => {
+                    this.productsLoading = false;
+                });
+            }
+        },
+        watch: {
+            page() {
+                this.loadProductsData();
+            },
+            filter: {
+                handler() {
+                    this.loadProductsData();
+                },
+                deep: true
+            }
+        },
+        created() {
+            this.loadProductsData();
         }
     }
 </script>

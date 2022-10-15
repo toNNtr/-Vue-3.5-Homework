@@ -26,7 +26,7 @@
         </b>
 
         <button class="product__del button-del" type="button" aria-label="Удалить товар из корзины"
-            @click.prevent="deleteProduct(cartProduct.productID)"
+            @click.prevent="deleteCartProduct(cartProduct.productID)"
         >
             <svg width="20" height="20" fill="currentColor">
                 <use xlink:href="#icon-close"></use>
@@ -36,37 +36,33 @@
 </template>
 
 <script>
-import {
-    mapMutations
-} from "vuex";
-import InputNumber from "@/components/InputNumber.vue";
+    import { mapActions } from "vuex";
+    import InputNumber from "@/components/InputNumber.vue";
 
-import numberFormat from "@/helpers/numberFormat.js";
-export default {
-    props: ["cartProduct"],
-    components: {
-        InputNumber
-    },
-    filters: {
-        numberFormat
-    },
-    methods: {
-        ...mapMutations({
-            deleteProduct: "deleteCartProduct"
-        })
-    },
-    computed: {
-        amount: {
-            get() {
-                return this.cartProduct.amount;
-            },
-            set(newValue) {
-                this.$store.commit("updateCartProductAmount", {
-                    productID: this.cartProduct.productID,
-                    amount: newValue
-                });
+    import numberFormat from "@/helpers/numberFormat.js";
+    export default {
+        props: ["cartProduct"],
+        components: {
+            InputNumber
+        },
+        filters: {
+            numberFormat
+        },
+        methods: {
+            ...mapActions({
+                deleteCartProduct: "deleteCartProduct",
+                updateCartProductAmount: "updateCartProductAmount"
+            })
+        },
+        computed: {
+            amount: {
+                get() {
+                    return this.cartProduct.amount;
+                },
+                set(newValue) {
+                    this.updateCartProductAmount({productID: this.cartProduct.productID, amount: newValue});
+                }
             }
         }
     }
-}
 </script>

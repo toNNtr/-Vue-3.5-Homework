@@ -4,7 +4,7 @@
             v-if="showClear"
         >
             <label class="colors__label" title="Очистить">
-                <input class="colors__radio sr-only" type="radio" :name="`${_uid}color`"
+                <input class="colors__radio sr-only" type="radio" :name="`${ _uid }color`"
                     v-model="currentColorID"
                     :value="null"
                 >
@@ -18,11 +18,11 @@
             :key="color.id"
         >
             <label class="colors__label" :title="color.title">
-                <input class="colors__radio sr-only" type="radio" :name="`${_uid}color`"
+                <input class="colors__radio sr-only" type="radio" :name="`${ _uid }color`"
                     v-model="currentColorID"
                     :value="color.id"
                 >
-                <span class="colors__value" :style="{ 'background-color': `${color.value}`}">
+                <span class="colors__value" :style="{ 'background-color': `${ color.value }` }">
                 </span>
             </label>
         </li>
@@ -30,33 +30,33 @@
 </template>
 
 <script>
-export default {
-    model: {
-        prop: "selectedColor",
-        event: "colorChanged"
-    },
-    props: {
-        colors: Array,
-        selectedColor: String,
-        showClear: Boolean
-    },
-    data() {
-        return {
-            currentColorID: this.selectedColor
-        };
-    },
-    computed: {
-        colorsList() {
-            return this.colors;
-        }
-    },
-    watch: {
-        currentColorID(newValue) {
-            this.$emit("colorChanged", newValue);
+    export default {
+        model: {
+            prop: "selectedColor",
+            event: "colorChanged"
         },
-        selectedColor(newValue) {
-            this.currentColorID = newValue;
+        props: {
+            colors: Array,
+            selectedColor: [String, Number],
+            showClear: Boolean
+        },
+        data() {
+            return {
+                currentColorID: this.selectedColor
+            };
+        },
+        computed: {
+            colorsList() {
+                return this.colors;
+            }
+        },
+        watch: {
+            currentColorID(newValue) {
+                this.$emit("colorChanged", newValue);
+            },
+            selectedColor(newValue) {
+                this.currentColorID = newValue;
+            }
         }
     }
-}
 </script>

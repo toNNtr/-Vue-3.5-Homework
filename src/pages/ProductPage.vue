@@ -1,16 +1,28 @@
 <template>
-    <main class="content container">
+    <main class="content container"
+        v-if="productLoading"
+    >
+        Загрузка товара...
+    </main>
+    <main class="content container"
+        v-else-if="!product"
+    >
+        При загрузке товара произошла ошибка
+    </main>
+    <main class="content container"
+        v-else
+    >
         <div class="content__top">
             <ul class="breadcrumbs">
                 <li class="breadcrumbs__item">
-                    <router-link class="breadcrumbs__link" :to="{name: 'main'}">
+                    <router-link class="breadcrumbs__link" :to="{ name: 'main' }">
                         Каталог
                     </router-link>
                 </li>
                 <li class="breadcrumbs__item"
                     v-if="category"
                 >
-                    <router-link class="breadcrumbs__link" :to="{name: 'main'}">
+                    <router-link class="breadcrumbs__link" :to="{ name: 'main' }">
                         {{ category.title }}
                     </router-link>
                 </li>
@@ -28,32 +40,6 @@
                         :alt="product.title"
                     >
                 </div>
-                <!-- <ul class="pics__list">
-                    <li class="pics__item">
-                        <a href="" class="pics__link pics__link--current">
-                            <img width="98" height="98" src="img/phone-square-1.jpg"
-                                srcset="img/phone-square-1@2x.jpg 2x" alt="Название товара">
-                        </a>
-                    </li>
-                    <li class="pics__item">
-                        <a href="" class="pics__link">
-                            <img width="98" height="98" src="img/phone-square-2.jpg"
-                                srcset="img/phone-square-2@2x.jpg 2x" alt="Название товара">
-                        </a>
-                    </li>
-                    <li class="pics__item">
-                        <a href="" class="pics__link">
-                            <img width="98" height="98" src="img/phone-square-3.jpg"
-                                srcset="img/phone-square-3@2x.jpg 2x" alt="Название товара">
-                        </a>
-                    </li>
-                    <li class="pics__item">
-                        <a class="pics__link" href="#">
-                            <img width="98" height="98" src="img/phone-square-4.jpg"
-                                srcset="img/phone-square-4@2x.jpg 2x" alt="Название товара">
-                        </a>
-                    </li>
-                </ul> -->
             </div>
 
             <div class="item__info">
@@ -116,10 +102,18 @@
                                 v-model.number="amount"
                             />
 
-                            <button class="button button--primery" type="submit">
+                            <button class="button button--primery" type="submit"
+                                :disabled="addProductStatus == 'pending'"
+                            >
                                 В корзину
                             </button>
                         </div>
+                        <div 
+                            v-show="addProductStatus == 'done'"
+                        >Товар добавлен в корзину</div>
+                        <div 
+                            v-show="addProductStatus == 'pending'"
+                        >Добавление товара...</div>
                     </form>
                 </div>
             </div>
@@ -191,50 +185,87 @@
 </template>
 
 <script>
-import products from "@/data/products.js";
-import colors from "@/data/colors.js";
-import categories from "@/data/categories.js";
+    import { mapActions } from "vuex";
 
-import numberFormat from "@/helpers/numberFormat.js";
 
-import InputNumber from "@/components/InputNumber.vue";
-import BaseColors from "@/components/BaseColors.vue";
+    import numberFormat from "@/helpers/numberFormat.js";
 
-export default {
-    components: {
-        BaseColors,
-        InputNumber
-    },
-    data() {
-        return {
-            currentColorID: null,
-            amount: 1
-        };
-    },
-    methods: {
-        addToCart() {
-            this.$store.commit("addProductToCart", {
-                productID: this.product.id,
-                amount: this.amount
-            });
-        }
-    },
-    computed: {
-        product() {
-            return products.find(product => product.id == Number(this.$route.params.id));
+    import InputNumber from "@/components/InputNumber.vue";
+    import BaseColors from "@/components/BaseColors.vue";
+
+    export default {
+        components: {
+            BaseColors,
+            InputNumber
         },
-        category() {
-            return categories.find(category => category.id == this.product.categoryID);
+        data() {
+            return {
+                currentColorID: null,
+                amount: 1,
+                productData: null,
+                productLoading: false,
+                productLoadingFailed: false,
+                addProductStatus: ""
+            };
         },
-        colors() {
-            return colors.filter(color => this.product.colors.find(productColorID => productColorID == color.id));
+        methods: {
+            ...mapActions({
+                addProductToCart: "addProductToCart",
+                loadProduct: "loadProduct"
+            }),
+            addToCart() {
+                if(this.addProductStatus != "pending") {
+                    this.addProductStatus = "pending";
+                    this.addProductToCart({productID: this.product.id, amount: this.amount})
+                    .then(() => {
+                        this.addProductStatus = "done";
+                    });
+                }
+            },
+            loadProductData() {
+                this.productLoading = true;
+
+                this.loadProduct({productID: this.$route.params.id})
+                .then(productData => {
+                    this.productData = productData;
+                })
+                .catch(reason => {
+                    this.productLoadingFailed = true;
+                })
+                .finally(() => {
+                    this.productLoading = false;
+                });
+            }
+        },
+        computed: {
+            product() {
+                return this.productData ? {
+                    ...this.productData,
+                    image: this.productData.image.file.url
+                } : null;
+            },
+            category() {
+                return this.product ? this.product.category : null;
+            },
+            colors() {
+                return this.product ? this.product.colors.map(color => {
+                    return {
+                        ...color,
+                        value: color.code
+                    };
+                }) : [];
+            }
+        },
+        filters: {
+            numberFormat
+        },
+        watch: {
+            "$route.params.id": {
+                handler() {
+                    this.loadProductData();
+                },
+                immediate: true
+            }
         }
-    },
-    filters: {
-        numberFormat
-    },
-    created() {
-        this.currentColorID = this.product.colors[0];
     }
-}
 </script>
