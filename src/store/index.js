@@ -12,7 +12,8 @@ export default new Vuex.Store({
         cartProductsData: null,
         isCartLoading: false,
         categories: [],
-        colors: []
+        colors: [],
+        orderInfo: null
     },
     mutations: {
         addProductToCart(state, { productID, amount }) {
@@ -47,6 +48,18 @@ export default new Vuex.Store({
                     amount: item.quantity
                 }
             });
+        },
+        resetCart(state) {
+            state.cartProducts = [];
+            state.cartProductsData = [];
+        },
+        updateOrderInfo(state, orderInfo) {
+            state.orderInfo = {
+                ...orderInfo,
+                amount: orderInfo.basket.items.reduce((previousValue, currentItem) => {
+                    return previousValue + currentItem.quantity;
+                }, 0)
+            };
         }
     },
     getters: {
@@ -78,13 +91,22 @@ export default new Vuex.Store({
         },
         colors(state) {
             return state.colors;
+        },
+        orderInfo(state) {
+            return id => {
+                if(state.orderInfo && state.orderInfo.id == id) {
+                    return state.orderInfo;
+                }
+    
+                return null;
+            }
         }
     },
     actions: {
         loadCart(context) {
             context.state.isCartLoading = true;
             
-            return new Promise(resolve => setTimeout(resolve, 2000))
+            return new Promise(resolve => setTimeout(resolve, 0))
             .then(() => {
                 return fetch(`${API_BASE_URL}/api/baskets?`
                 + new URLSearchParams({
@@ -117,7 +139,7 @@ export default new Vuex.Store({
             })
         },
         addProductToCart(context, { productID, amount }) {
-            return new Promise(resolve => setTimeout(resolve, 2000))
+            return new Promise(resolve => setTimeout(resolve, 0))
             .then(() => {
                 return fetch(`${API_BASE_URL}/api/baskets/products?userAccessKey=${context.state.userAccessKey}`, {
                     method: "POST",
@@ -272,7 +294,7 @@ export default new Vuex.Store({
             });
         },
         loadProduct(context, { productID }) {
-            return new Promise(resolve => setTimeout(resolve, 2000))
+            return new Promise(resolve => setTimeout(resolve, 0))
             .then(() => {
                 return fetch(`${API_BASE_URL}/api/products/${ productID }`, {
                     method: "GET",
@@ -288,6 +310,47 @@ export default new Vuex.Store({
                     return response.json();
                 });
             });
+        },
+        sendOrder(context, formData) {
+            return new Promise(resolve => setTimeout(resolve, 2000))
+            .then(() => {
+                return fetch(`${API_BASE_URL}/api/orders?userAccessKey=${context.state.userAccessKey}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if(response.status != 200 & response.status != 400) {
+                        throw response.statusText;
+                    }
+
+                    return response.json();
+                })
+            })
+        },
+        loadOrderInfo(context, orderID) {
+            return new Promise(resolve => setTimeout(resolve, 2000))
+            .then(() => {
+                return fetch(`${API_BASE_URL}/api/orders/${orderID}?userAccessKey=${context.state.userAccessKey}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+
+                })
+                .then(response => {
+                    if(!response.ok) {
+                        throw response.statusText;
+                    }
+
+                    return response.json();
+                })
+                .then(responseBody => {
+                    context.commit("updateOrderInfo", responseBody);
+                });
+            })
         }
     }
 });
